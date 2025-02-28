@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "saiganesh0918/flask-app"
-        K8S_NAMESPACE = "mini-demo1"
+        IMAGE_NAME = 'saiganesh0918/flask-app'  // Docker Hub image name
+        IMAGE_TAG = 'v1'  // Image version tag
+        K8S_NAMESPACE = 'mini-demo-1'  // Kubernetes namespace
     }
 
     stages {
@@ -15,27 +16,23 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-		sh '''
-        #!/bin/bash
-        docker build -t ${env.IMAGE_NAME}:latest -f app/Dockerfile app/
-        '''
-                            }
+                sh '/bin/bash -c "docker build -t ${IMAGE_NAME}:latest -t ${IMAGE_NAME}:${IMAGE_TAG} -f app/Dockerfile app/"'
+            }
         }
 
         stage('Push Docker Image') {
             steps {
-		  withDockerRegistry([credentialsId: 'docker-hub', url: '']) {
-            sh 'docker push ${env.IMAGE_NAME}:latest'
-        }
-               
-                    
-		}
+                withDockerRegistry([credentialsId: 'docker-hub', url: '']) {
+                    sh '/bin/bash -c "docker push ${IMAGE_NAME}:latest"'
+                    sh '/bin/bash -c "docker push ${IMAGE_NAME}:${IMAGE_TAG}"'
+                }
             }
+        }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml -n ${env.K8S_NAMESPACE}'
-        	sh 'kubectl apply -f k8s/service.yaml -n ${env.K8S_NAMESPACE}'
+                sh '/bin/bash -c "kubectl apply -f k8s/deployment.yaml -n ${K8S_NAMESPACE}"'
+                sh '/bin/bash -c "kubectl apply -f k8s/service.yaml -n ${K8S_NAMESPACE}"'
             }
         }
     }
