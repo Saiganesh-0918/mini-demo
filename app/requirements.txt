@@ -1,2 +1,2 @@
 Flask==2.0.3
-WerkZeug==2.03
+WerkZeug==2.0.3
