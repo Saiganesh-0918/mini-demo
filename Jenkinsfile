@@ -15,22 +15,25 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                sh 'docker build -t ${env.IMAGE_NAME}:latest -f app/Dockerfile app/'
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub', url: '']) {
-                    sh 'docker push $IMAGE_NAME:latest'
-                }
+		  withDockerRegistry([credentialsId: 'docker-hub', url: '']) {
+            sh 'docker push ${env.IMAGE_NAME}:latest'
+        }
+               
+                    
+		}
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml -n $K8S_NAMESPACE'
-                sh 'kubectl apply -f k8s/service.yaml -n $K8S_NAMESPACE'
+                sh 'kubectl apply -f k8s/deployment.yaml -n ${env.K8S_NAMESPACE}'
+        	sh 'kubectl apply -f k8s/service.yaml -n ${env.K8S_NAMESPACE}'
             }
         }
     }
