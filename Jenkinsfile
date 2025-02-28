@@ -15,8 +15,11 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${env.IMAGE_NAME}:latest -f app/Dockerfile app/'
-            }
+		sh '''
+        #!/bin/bash
+        docker build -t ${env.IMAGE_NAME}:latest -f app/Dockerfile app/
+        '''
+                            }
         }
 
         stage('Push Docker Image') {
